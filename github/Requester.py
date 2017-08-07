@@ -42,6 +42,7 @@ import sys
 import Consts
 import re
 import os
+from tests.Framework import ReplayingConnection
 
 atLeastPython26 = sys.hexversion >= 0x02060000
 atLeastPython3 = sys.hexversion >= 0x03000000
@@ -331,7 +332,11 @@ class Requester:
         ## set.
         ## http_proxy: http://user:password@proxy_host:proxy_port
         ##
-        proxy_uri = os.getenv('http_proxy') or os.getenv('HTTP_PROXY')
+        if self.__connectionClass(self.__hostname, self.__port, **kwds).__class__ != ReplayingConnection:
+            proxy_uri = os.getenv('http_proxy') or os.getenv('HTTP_PROXY')
+        else:
+            proxy_uri = None
+
         if proxy_uri is not None:
             url = urlparse.urlparse(proxy_uri)
             conn = self.__connectionClass(url.hostname, url.port, **kwds)
